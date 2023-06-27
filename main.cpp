@@ -6,10 +6,11 @@ using namespace std;
 
 class node{
     private:
+    
+    public:
     node* left,* right;
     long long int freq;
     char c;
-    public:
     node(){
 
     }
@@ -32,9 +33,76 @@ class node{
         return (left==NULL)&&(right==NULL);
     }
 };
+
+struct comp{
+    bool operator()(node* a, node* b)
+    {
+        return (a->freq) < (b->freq);
+    }
+};
+void construct_repr(node* root,vector<string>& repr, string s) //fills the representation vector corresponding to each char
+{
+    if(!root)
+    {
+        return ;
+    }
+    if(root->is_leaf())
+    {
+        if(s=="")
+        {
+            repr[root->c]="0";
+        }
+        else
+        {
+            repr[root->c]=s;
+        }
+
+    }
+    construct_repr(root->left,repr,s+'0');
+    construct_repr(root->right,repr,s+'1');
+}
+
+//My compression will first store the huffman table then store the total number of bytes in input file and then compress input
 void compress_file(ifstream & in,ofstream & out)
 {
-    
+    vector<long long int> cnt(256,0); //stores count of each ascii in input file
+    if(!in || !out)
+    {
+        cout<<"Incorrect path"<<endl;
+        return ;
+    }
+    char ch;
+    while(in.get(ch))
+    {
+        cnt[int(ch)]++;
+    }
+    in.clear();
+    in.seekg(0,ios::beg); //to read from begining of the file again;
+    priority_queue<node*,vector<node*>,comp>pq; //huffman heap
+    for(int i=0;i<256;i++)
+    {
+        if(cnt[i]>0)
+        {
+        pq.push(new node(cnt[i],'\0'+i));
+        }
+    }
+    while(pq.size()>1)
+    {
+        node* left,*right;
+        left=pq.top();
+        pq.pop();
+        right = pq.top();
+        pq.pop();
+        long long int fre=(left->freq)+(right->freq);
+        pq.push(new node(fre,'\0',left,right));
+    }
+    vector<string> repr(256);//stores the binary representation of each char in string format
+    node* root=pq.top();
+    pq.pop();
+    construct_repr(root,repr,"");
+
+
+
 }
 void compress(string input_path, string output_path)
 {
