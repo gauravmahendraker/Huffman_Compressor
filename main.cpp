@@ -72,9 +72,11 @@ void compress_file(ifstream & in,ofstream & out)
         return ;
     }
     char ch;
+    long long int total_chars=0;
     while(in.get(ch))
     {
         cnt[int(ch)]++;
+        total_chars++;
     }
     in.clear();
     in.seekg(0,ios::beg); //to read from begining of the file again;
@@ -86,6 +88,7 @@ void compress_file(ifstream & in,ofstream & out)
         pq.push(new node(cnt[i],'\0'+i));
         }
     }
+    int total_distinct_chars=pq.size();
     while(pq.size()>1)
     {
         node* left,*right;
@@ -100,6 +103,21 @@ void compress_file(ifstream & in,ofstream & out)
     node* root=pq.top();
     pq.pop();
     construct_repr(root,repr,"");
+    //First a 16 bit (2 byte) number representing the number of total_distinct_chars;
+    out.put(total_distinct_chars>>8);
+    out.put(total_distinct_chars%256);
+    for(int i=0;i<256;i++)
+    {
+        if(cnt[i])//if present in char then encoding the ascii of char and binary represnetation relation
+        {
+            out.put(i); // first 8 bit represnt the key char
+            int16_t total_bits_repr=repr[i].length(); //next 16 bit represnt the number of bits in value of key
+            out.put(total_bits_repr>>8);
+            out.put(total_bits_repr%256);
+            
+        }
+    }
+
 
 
 
