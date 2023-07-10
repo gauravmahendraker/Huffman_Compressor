@@ -399,7 +399,7 @@ int main(int argc,char *argv[]) //comand line arrguments in c++ argc is argument
                 cin >> input_file;
                 cout << "Enter output file (without file extension): ";
                 cin >> output_file;
-                cout << "Compressing " << input_file << " to " << output_file + ".hufbin" << endl;
+                cout << "Compressing " << input_file << " to " << output_file + ".ziph" << endl;
                 compress(input_file, output_file);
             }
             else if (command == "decompress" || command == "d")
