@@ -14,7 +14,7 @@ class node{
     public:
     node* left,* right;
     long long int freq;
-    char c;
+    unsigned char c;
     node(){
 
     }
@@ -66,35 +66,23 @@ void construct_repr(node* root,vector<string>& repr, string s) //fills the repre
     construct_repr(root->right,repr,s+'1');
 }
 
-void insert_string(ofstream & out, string & s, bool append=false)
+void insert_string(ofstream &out, string &s, bool pad = false)
 {
-    static unsigned char temp= '\0';
-    static int temp_cnt=0;
-    int n=s.length();
-    for(int i=0;i<n;i++)
+    static unsigned char temp = '\0';
+    static int counter = 0;
+    long long int size = s.size();
+    for (long long int i = 0; i < size; i++)
     {
-        temp_cnt++;
-        temp=(temp<<1)+(s[i]-'0');
-        if(temp_cnt==8)
-        {
-            out.put(temp);
-            temp='\0';
-            temp_cnt=0;
-        }
+        temp = temp << 1 | (s[i]-'0');
+        counter++;
+        if (counter == 8)
+            out.put(temp), counter = 0, temp = '\0';
     }
-    if(append)
+    if (counter && pad)
     {
-        if(temp_cnt)
-        {
-            while(temp_cnt<8)
-            {
-                temp_cnt++;
-                temp=temp<<1;
-            }
-            temp_cnt=0;
-            out.put(temp);
-            temp='\0';
-        }
+        // cout<<"yes\n";
+        while(counter!=8) counter++, temp <<= 1;
+        counter = 0, out.put(temp);
     }
 }
 
@@ -161,12 +149,16 @@ void compress_file(ifstream & in,ofstream & out)
     {
         out.put((total_chars >> i)%256);
     }
+  //  cout<<total_chars;
     int count=0;
+    string temp1;
     while(in.get(ch))
     {
-        insert_string(out,repr[ch],false);
+
+        insert_string(out,repr[(256+ch)%256],false);
         count++;
     }
+   // cout<<count<<endl;
     string temp;
     insert_string(out,temp,true);
     cout<<"Compression successful..."<<endl;
@@ -190,7 +182,7 @@ string ch_to_str(char c,int nums)
     {
         if((1<<i)&val)
         {
-            temp[i]=1;
+            temp[7-i]=1;
         }
     }
     string ans;
@@ -226,7 +218,7 @@ node* construct_trie(vector<string> & repr)
                     cur=cur->left;
                 }
             }
-            cur->c=i;
+            cur->c=i+'\0';
         }
     }
     return root;
@@ -249,7 +241,7 @@ void decode_file(ifstream & in, ofstream & out)
     for(int i=0;i<number_of_chars;i++)
     {
         in.get(ch);
-        int ind=(int)ch;
+        int ind=(ch+256)%256;
         int16_t bit_len=0;
         in.get(ch);
         bit_len+=((int)ch)<<8;
@@ -276,31 +268,43 @@ void decode_file(ifstream & in, ofstream & out)
     {
         in.get(ch);
         long long int val=(int)ch;
-        tot_chars+=(val)<<((7-i)*8);
+        tot_chars+=((val)<<((7-i)*8));
 
     }
     node* cur=trie;
+    int count=0;
+  //  cout<<"going..";
     while(in.get(ch))
     {
-        int val=ch;
+        count++;
+        int val=(ch+256)%256;
+      //  cout<<val<<endl;
         for(int i=7;i>-1;i--)
         {
             if(cur->c!='\0')
             {
                 
                 out.put(cur->c);
+               // cout<<cur->c;
                 cur=trie;
             }
             if(val&(1<<i))
             {
+                if(cur->right)
+                {
                 cur=cur->right;
+                }
             }
             else
             {
+                if(cur->left)
+                {
                 cur=cur->left;
+                }
             }
         }
     }
+    cout<<count<<endl;
     cout<<"Decoding successful..."<<endl;
     return ;
     
@@ -314,7 +318,7 @@ void compress(string input_path, string output_path)
         cout<<"Incorrect input path"<<endl;
         return;
     }
-    ofstream out(output_path+".ziphuffman",ios::binary); //writes on file
+    ofstream out(output_path+".ziph",ios::binary); //writes on file
     if(!out)
     {
         cout<<"Incorrect output path"<<endl;
