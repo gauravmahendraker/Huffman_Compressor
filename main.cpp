@@ -336,7 +336,7 @@ void compress(string input_path, string output_path)
  void decode(string & input_path, string & output_path)
  {
     ifstream in(input_path,ios::binary);//this is ziphuffman file
-    ofstream out(output_path,ios::binary);//here this is textfile
+    ofstream out(output_path+".txt",ios::binary);//here this is textfile
     if(!in || !out)
     {
         cout<<"error reading or writing the files"<<endl;
@@ -348,7 +348,17 @@ void compress(string input_path, string output_path)
     cout<<"Decoding finished.."<<endl;
     
  }
-
+void help_banner()
+{
+    cout<<"\nThis program implements huffman coding algorithm to compress and decompress any type of files."<<endl;
+    cout<<"Usage: ./huffman [command] [input_file] [output_file]"<<endl;
+    cout<<"Alternatively, you can run the program without any arguments and follow the instructions."<<endl;
+    cout<<"Commands:"<<endl;
+    cout<<"compress (c) - Compresses the input file and saves it as output file"<<endl;
+    cout<<"decompress (d) - Decompresses the input file and saves it as output file"<<endl;
+    cout<<"help (h) - Displays this help message"<<endl;
+    cout<<"exit - Exits the program\n"<<endl;
+}
 int main(int argc,char *argv[]) //comand line arrguments in c++ argc is argument count and argv is argument values
 {
     if(argc>1)
@@ -367,7 +377,49 @@ int main(int argc,char *argv[]) //comand line arrguments in c++ argc is argument
             cout<<"Decoding"<<input_file_path<<" to "<<output_file_path<<endl;
             decode(input_file_path,output_file_path);
         }
+         else if (command == "help" || command == "h" || command == "--h")
+            help_banner();
+        else
+            cout << "Invalid command" << endl;
 
 
+    }
+    else
+    {
+        cout << "Welcome to Huffman Compressor Decompressor Program\nCreated by Gaurav Mahendraker. All rights reserved.\nPress enter help(h) for instructions." << endl;
+        string command, input_file, output_file;
+        while (true)
+        {
+            cout << "\nEnter command: ";
+            cin >> command;
+            transform(command.begin(), command.end(), command.begin(), ::tolower);
+            if (command == "compress" || command == "c")
+            {
+                cout << "Enter input file: ";
+                cin >> input_file;
+                cout << "Enter output file (without file extension): ";
+                cin >> output_file;
+                cout << "Compressing " << input_file << " to " << output_file + ".hufbin" << endl;
+                compress(input_file, output_file);
+            }
+            else if (command == "decompress" || command == "d")
+            {
+                cout << "Enter input file (with .ziph extension): ";
+                cin >> input_file;
+                cout << "Enter output file (without original file extension): ";
+                cin >> output_file;
+                cout << "Decompressing " << input_file << " to " << output_file << endl;
+                decode(input_file, output_file);
+            }
+            else if (command == "help"|| command == "h" || command == "--h")
+                help_banner();
+            else if (command == "exit")
+            {
+                cout << "\nExiting...\nThank you for using the program!" << endl;
+                break;
+            }
+            else
+                cout << "Invalid command" << endl;
+        }
     }
 }
